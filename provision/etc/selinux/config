@@ -1,0 +1,6 @@
+# Disabling SELINUX because Apache doesn't seem to be able to
+# serve from VirtualBox shares with it enabled..might want to
+# revisit at some point
+SELINUX=disabled
+SELINUXTYPE=targeted
+SETLOCALDEFS=0
