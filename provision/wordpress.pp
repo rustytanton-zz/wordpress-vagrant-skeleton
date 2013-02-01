@@ -61,14 +61,14 @@ exec { "checkout_wordpress_branch":
 #}
 
 # copy www config files
-file { $wwwroot:
-	ensure => "present",
-	group => "vagrant",
-	owner => "vagrant",
-	recurse => true,
-	source => "/vagrant/provision/var/www/html",
-	require => Exec["clone_wordpress"]
-}
+#file { $wwwroot:
+#	ensure => "present",
+#	group => "vagrant",
+#	owner => "vagrant",
+#	recurse => true,
+#	source => "/vagrant/provision/var/www/html",
+#	require => Exec["clone_wordpress"]
+#}
 
 # link src folder in repo to wp-content folder in wordpress
 file { "${$wwwroot}/wp-content":
