@@ -5,16 +5,21 @@ $wwwroot = "/var/www/html"
 # path defaults
 Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
 
-# enable the epel yum repo (present but disabled on the default VM)
-yumrepo { "epel": enabled => 1 }
-
-# disable SELinux on initial boot (config file should disable for future boots)
-exec { "disable_selinux":
-	command => "setenforce 0 >& /dev/null"
+# enable the epel yum repo
+yumrepo { "epel":
+	descr => "Extra Packages for Enterprise Linux 6 - \$basearch",
+	baseurl => "http://download.fedoraproject.org/pub/epel/6/\$basearch",
+	gpgcheck => "0",
+	enabled => "1"
 }
 
+# disable SELinux on initial boot (config file should disable for future boots)
+#exec { "disable_selinux":
+#	command => "setenforce 0 >& /dev/null"
+#}
+
 # install packages
-$packages = [ "httpd", "mysql", "mysql-server", "mysql-devel", "php53", "php53-mysql", "php53-devel", "php53-mbstring", "php53-common", "php53-cli", "php53-gd", "php53-pdo", "shadow-utils", "git", "phpMyAdmin3", "php53-mcrypt" ]
+$packages = [ "httpd", "mysql", "mysql-server", "mysql-devel", "php", "php-mysql", "php-devel", "php-mbstring", "php-common", "php-cli", "php-gd", "php-pdo", "shadow-utils", "git", "phpMyAdmin", "php-mcrypt", "iptables" ]
 package { $packages:
 	ensure => "installed",
 	require => Yumrepo["epel"]
@@ -30,7 +35,7 @@ file { "/etc":
 	ensure => "present",
 	source => "/vagrant/provision/etc",
 	recurse => true,
-	require => Package[["phpMyAdmin3","httpd"]]
+	require => Package[["phpMyAdmin","httpd"]]
 }
 
 # clean out the /var/www/html directory if no wp-config.php file is found (should only run once)
@@ -97,6 +102,11 @@ service { "httpd":
 	enable => true,
 	ensure => running,
 	require => [ Package['httpd'], File['/etc'] ]
+}
+service { "iptables":
+	enable => false,
+	ensure => stopped,
+	require => Package['iptables']
 }
 
 # set mysql root password
