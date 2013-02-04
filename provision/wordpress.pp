@@ -3,7 +3,7 @@ $wordpress_tag = "3.5.1"
 $wwwroot = "/var/www/html"
 
 # path defaults
-Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin" ] }
+Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin/" ] }
 
 # enable the epel yum repo
 yumrepo { "epel":
@@ -44,10 +44,16 @@ exec { "clone_wpcli":
 	onlyif => "test ! -d /usr/share/wp-cli",
 	require => Package["git"]
 }
-exec { "install_wpcli":
-	command => "/usr/share/wp-cli/utils/dev-build >& /dev/null; composer install >& /dev/null",
+exec { "install_wpcli_1":
+	command => "/usr/share/wp-cli/utils/dev-build >& /dev/null",
 	cwd => "/usr/share/wp-cli",
 	onlyif => "test ! -L /usr/bin/wp",
+	require => [ Exec["clone_wpcli"], File['/usr/local/bin/composer'] ]
+}
+exec { "install_wpcli_2":
+	command => "composer install",
+	cwd => "/usr/share/wp-cli",
+	onlyif => "test ! -f /usr/share/wp-cli/composer.lock",
 	require => [ Exec["clone_wpcli"], File['/usr/local/bin/composer'] ]
 }
 
@@ -89,14 +95,14 @@ exec { "checkout_wordpress_branch":
 #}
 
 # copy www config files
-#file { $wwwroot:
-#	ensure => "present",
-#	group => "vagrant",
-#	owner => "vagrant",
-#	recurse => true,
-#	source => "/vagrant/provision/var/www/html",
-#	require => Exec["clone_wordpress"]
-#}
+file { $wwwroot:
+	ensure => "present",
+	group => "vagrant",
+	owner => "vagrant",
+	recurse => true,
+	# source => "/vagrant/provision/var/www/html",
+	require => Exec["clone_wordpress"]
+}
 
 # link src folder in repo to wp-content folder in wordpress
 file { "${$wwwroot}/wp-content":
