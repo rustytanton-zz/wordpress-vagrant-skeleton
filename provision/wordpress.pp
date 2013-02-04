@@ -41,7 +41,7 @@ file { "/usr/local/bin/composer":
 }
 exec { "clone_wpcli":
 	command => "git clone git://github.com/wp-cli/wp-cli.git /usr/share/wp-cli >& /dev/null",
-	onlyif => "test ! -D /usr/share/wp-cli",
+	onlyif => "test ! -d /usr/share/wp-cli",
 	require => Package["git"]
 }
 exec { "install_wpcli":
