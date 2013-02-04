@@ -3,7 +3,7 @@ $wordpress_tag = "3.5.1"
 $wwwroot = "/var/www/html"
 
 # path defaults
-Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
+Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin" ] }
 
 # enable the epel yum repo
 yumrepo { "epel":
@@ -41,14 +41,14 @@ file { "/usr/local/bin/composer":
 }
 exec { "clone_wpcli":
 	command => "git clone git://github.com/wp-cli/wp-cli.git /usr/share/wp-cli >& /dev/null",
-	onlyif => "test ! -L /usr/bin/wp",
+	onlyif => "test ! -D /usr/share/wp-cli",
 	require => Package["git"]
 }
 exec { "install_wpcli":
-	command => "utils/dev-build >& /dev/null; composer install >& /dev/null",
+	command => "/usr/share/wp-cli/utils/dev-build >& /dev/null; composer install >& /dev/null",
 	cwd => "/usr/share/wp-cli",
 	onlyif => "test ! -L /usr/bin/wp",
-	require => Exec["clone_wpcli"]
+	require => [ Exec["clone_wpcli"], File['/usr/local/bin/composer'] ]
 }
 
 # copy config files recursively (wait for packages to drop default files before sync)
