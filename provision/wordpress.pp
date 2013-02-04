@@ -24,16 +24,39 @@ package { $packages:
 	ensure => "installed",
 	require => Yumrepo["epel"]
 }
-exec { "install_composer":
-	command => "curl -O http://getcomposer.org/composer.phar >& /dev/null; ln -s /usr/local/bin/composer.phar /usr/local/bin/composer >& /dev/null",
+exec { "download_composer":
+	command => "curl -O http://getcomposer.org/composer.phar >& /dev/null",
 	cwd => "/usr/local/bin",
-	onlyif => "test ! -L /usr/local/bin/composer"
+	onlyif => "test ! -f /usr/local/bin/composer.phar"
+}
+file { "/usr/local/bin/composer.phar":
+	ensure => "present",
+	mode => "0755",
+	require => Exec['download_composer']
+}
+file { "/usr/local/bin/composer":
+	ensure => "link",
+	require => File["/usr/local/bin/composer.phar"],
+	target => "/usr/local/bin/composer.phar"
+}
+exec { "clone_wpcli":
+	command => "git clone git://github.com/wp-cli/wp-cli.git /usr/share/wp-cli >& /dev/null",
+	onlyif => "test ! -L /usr/bin/wp",
+	require => Package["git"]
+}
+exec { "install_wpcli":
+	command => "utils/dev-build >& /dev/null; composer install >& /dev/null",
+	cwd => "/usr/share/wp-cli",
+	onlyif => "test ! -L /usr/bin/wp",
+	require => Exec["clone_wpcli"]
 }
 
 # copy config files recursively (wait for packages to drop default files before sync)
 file { "/etc":
 	ensure => "present",
+	group => 'root',
 	source => "/vagrant/provision/etc",
+	owner => 'root',
 	recurse => true,
 	require => Package[["phpMyAdmin","httpd"]]
 }
@@ -62,7 +85,7 @@ exec { "checkout_wordpress_branch":
 #	command => "composer install",
 #	cwd => "/vagrant",
 #	onlyif => "test ! -f /vagrant/composer.lock",
-#	require => [ Exec["install_composer"], Exec["clone_wordpress"] ]
+#	require => [ File["/usr/local/bin/composer"], Exec["clone_wordpress"] ]
 #}
 
 # copy www config files
@@ -84,7 +107,7 @@ file { "${$wwwroot}/wp-content":
 }
 
 # create folders that wordpress needs
-file { ["${$wwwroot}/wp-content/cache","${$wwwroot}/wp-content/blogs.dir"]:
+file { ["${$wwwroot}/wp-content/blogs.dir","${$wwwroot}/wp-content/uploads"]:
 	ensure => "directory",
 	group => "apache",
 	owner => "apache",
