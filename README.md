@@ -11,7 +11,7 @@ Instructions:
 4. Run the `ifconfig` command to find the VM's IP address
 5. Enter the IP address in a browser and you should see the WordPress install page.
 
-The "src" directory in the repo is symbolicall linked to the wp-content folder in the WordPress install in the VM.
+The "src" directory in the repo is symbolically linked to the wp-content folder in the WordPress install in the VM.
 
 You'll probably want to [edit your host file](http://www.howtogeek.com/howto/27350/beginner-geek-how-to-edit-your-hosts-file/) to have the VM mock a domain.
 
