@@ -14,3 +14,5 @@ Instructions:
 The "src" directory in the repo is symbolicall linked to the wp-content folder in the WordPress install in the VM.
 
 You'll probably want to [edit your host file](http://www.howtogeek.com/howto/27350/beginner-geek-how-to-edit-your-hosts-file/) to have the VM mock a domain.
+
+phpMyadmin is available at the path /phpmyadmin, the MySQL user name is wordpress/wordpress
